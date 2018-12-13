@@ -24,35 +24,39 @@ public class JsoupCssSelectSnippet {
 
         // Jsoup requires an absolute file path to resolve possible relative paths in HTML,
         // so providing InputStream through classpath resources is not a case
-        String resourcePath = "./samples/startbootstrap-freelancer-gh-pages-cut.html";
+        String resourcePath = "./samples/sample-0-origin.html";
 
-        String cssQuery = "div[id=\"success\"] button[class*=\"btn-primary\"]";
+        String cssQuery = "a[href=\"#ok\"]";
 
         Optional<Elements> elementsOpt = findElementsByQuery(new File(resourcePath), cssQuery);
-
-        Optional<List<String>> elementsAttrsOpts = elementsOpt.map(buttons ->
-                {
-                    List<String> stringifiedAttrs = new ArrayList<>();
-
-                    buttons.iterator().forEachRemaining(button ->
-                            stringifiedAttrs.add(
-                                    button.attributes().asList().stream()
-                                            .map(attr -> attr.getKey() + " = " + attr.getValue())
-                                            .collect(Collectors.joining(", "))));
-
-                    return stringifiedAttrs;
-                }
-        );
-
-
-        elementsAttrsOpts.ifPresent(attrsList ->
-                attrsList.forEach(attrs ->
-                        LOGGER.info("Target element attrs: [{}]", attrs)
-                )
-        );
+        parseAttributesFromElementsAndOutput(elementsOpt, "Target", LOGGER);
     }
 
-    private static Optional<Elements> findElementsByQuery(File htmlFile, String cssQuery) {
+    public static Optional<List<String>> parseAttributesFromElementsAndOutput(Optional<Elements> elementsOpt, String elementName, Logger logger) {
+        Optional<List<String>> elementsAttrsOpts = elementsOpt.map(buttons ->
+            {
+                List<String> stringifiedAttrs = new ArrayList<>();
+
+                buttons.iterator().forEachRemaining(button ->
+                    stringifiedAttrs.add(
+                        button.attributes().asList().stream()
+                            .map(attr -> attr.getKey() + " = " + attr.getValue())
+                            .collect(Collectors.joining(", "))));
+
+                return stringifiedAttrs;
+            }
+        );
+
+        elementsAttrsOpts.ifPresent(attrsList ->
+            attrsList.forEach(attrs ->
+                logger.info("{} element attrs: [{}]", elementName, attrs)
+            )
+        );
+
+        return elementsAttrsOpts;
+    }
+
+    public static Optional<Elements> findElementsByQuery(File htmlFile, String cssQuery) {
         try {
             Document doc = Jsoup.parse(
                     htmlFile,

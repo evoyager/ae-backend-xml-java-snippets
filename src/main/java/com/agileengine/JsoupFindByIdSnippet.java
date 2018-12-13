@@ -22,21 +22,26 @@ public class JsoupFindByIdSnippet {
 
         // Jsoup requires an absolute file path to resolve possible relative paths in HTML,
         // so providing InputStream through classpath resources is not a case
-        String resourcePath = "./samples/startbootstrap-freelancer-gh-pages-cut.html";
-        String targetElementId = "sendMessageButton";
+        String resourcePath = "./samples/sample-0-origin.html";
+        String targetElementId = "make-everything-ok-button";
 
         Optional<Element> buttonOpt = findElementById(new File(resourcePath), targetElementId);
-
-        Optional<String> stringifiedAttributesOpt = buttonOpt.map(button ->
-                button.attributes().asList().stream()
-                        .map(attr -> attr.getKey() + " = " + attr.getValue())
-                        .collect(Collectors.joining(", "))
-        );
-
-        stringifiedAttributesOpt.ifPresent(attrs -> LOGGER.info("Target element attrs: [{}]", attrs));
+        parseAttributesFromElementAndOutput(buttonOpt, "Target", LOGGER);
     }
 
-    private static Optional<Element> findElementById(File htmlFile, String targetElementId) {
+    public static Optional<String> parseAttributesFromElementAndOutput(Optional<Element> elementOpt, String elementName, Logger logger) {
+        Optional<String> stringifiedAttributesOpt = elementOpt.map(button ->
+            button.attributes().asList().stream()
+                .map(attr -> attr.getKey() + " = " + attr.getValue())
+                .collect(Collectors.joining(", "))
+        );
+
+        stringifiedAttributesOpt.ifPresent(attrs -> logger.info("{} element attrs: [{}]", elementName, attrs));
+
+        return stringifiedAttributesOpt;
+    }
+
+    public static Optional<Element> findElementById(File htmlFile, String targetElementId) {
         try {
             Document doc = Jsoup.parse(
                     htmlFile,
